@@ -64,7 +64,7 @@ class _InGameButtonState extends State<InGameButton> {
                       setState(() {
                      
                       });
-                    }, child: Text('butu'),),),),
+                    }, child: Text('butu',),),),),
                     Expanded(
                     child: SizedBox(height: 50, width: 60, 
                     child: OutlinedButton(onPressed: (){
