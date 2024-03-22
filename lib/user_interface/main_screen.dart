@@ -35,9 +35,13 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               ReserveBlock(),
               NextBlock(),
+              
              ],
           ),
-        SizedBox(child: GridBlock(), height: 550, width: 500,),
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: SizedBox(child: GridBlock(), height: 550, width: 500,),
+        ),
         (Status.inGame == false) ? startButton() : InGameButton(),
         ],
       ),

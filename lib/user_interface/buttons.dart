@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tetris_flutter/global.dart';
 
@@ -47,26 +48,25 @@ class InGameButton extends StatefulWidget {
 
 class _InGameButtonState extends State<InGameButton> {
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+
+  List<String> _label = ['Shift','left','right','down','rotate'];
+
+
+    
+  Widget _buttons (){
+    return 
         Padding(
               padding: const EdgeInsets.fromLTRB(100, 1, 100, 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(
-                    child: SizedBox(height: 40, width: 60, 
+                 SizedBox(height: 50, width: 100, 
                     child: OutlinedButton(onPressed: (){
                       setState(() {
                      
                       });
-                    }, child: Text('butu',),),),),
-                    Expanded(
-                    child: SizedBox(height: 50, width: 60, 
+                    }, child: Text('butu',),),),
+                    Flexible(
+                    child: SizedBox(height: 50, width: 100, 
                     child: OutlinedButton(onPressed: (){
                       setState(() {
          
@@ -75,30 +75,16 @@ class _InGameButtonState extends State<InGameButton> {
                   ),
                 ],
               ),
-            ),
-        Padding(
-              padding: const EdgeInsets.fromLTRB(100, 1, 100, 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: SizedBox(height: 50, width: 60, 
-                    child: OutlinedButton(onPressed: (){
-                      setState(() {
-                        
-                      });
-                    }, child: Text('butu'),),),),
-                    Expanded(
-                    child: SizedBox(height: 50, width: 60, 
-                    child: OutlinedButton(onPressed: (){
-                      setState(() {
-                       
-                      });
-                    }, child: Text('butu'),),),
-                  ),
-                ],
-              ),
-            ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+
+        _buttons(),
+        _buttons(),
         Padding(
               padding: const EdgeInsets.fromLTRB(90, 1, 90, 0),
               child: Row(
