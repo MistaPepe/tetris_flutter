@@ -6,7 +6,10 @@ import 'package:tetris_flutter/user_interface/main_screen.dart';
 void main() {
   runApp(Builder(
     builder: (context) {
-      return MaterialApp(home: LoadingScreen());
+      return MaterialApp(
+        home: LoadingScreen(),
+        
+        );
     }
   ));
 }
@@ -22,10 +25,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   void initState() {
+    super.initState();
+    
     Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainScreen()));
     });
-    super.initState();
   }
 
   @override
@@ -36,8 +40,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
             valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             backgroundColor: Colors.white,
             strokeWidth: 2.0,
-            value: null,
-            
+            value: Checkbox.width,
+            semanticsLabel: String.fromCharCode(1),
           ),
         ),
     );
