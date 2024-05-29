@@ -1,25 +1,27 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:tetris_flutter/global.dart';
 
-class startButton extends StatefulWidget {
+class StartButton extends StatefulWidget {
+  final String textStartbutton;
+  final Function onTapButton;
+  const StartButton(
+      {super.key, required this.textStartbutton, required this.onTapButton});
+
   @override
-  State<startButton> createState() => _startButtonState();
+  State<StartButton> createState() => _StartButtonState();
 }
 
-class _startButtonState extends State<startButton> {
+class _StartButtonState extends State<StartButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(90, 30, 90, 0),
+      padding: const EdgeInsets.fromLTRB(0, 1, 0, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-              flex: 1,
+              flex: 3,
               child: Text(
-                'Press Z to store. Press Space to drop. Left, Down, and Right arrow key to navigate. Shift to switch',
+                'Left, Down, and Right arrow key to navigate. Shift to rotate. Z to switch. Press Space to drop.',
                 style: TextStyle(
                   color: Colors.white,
                 ),
@@ -44,11 +46,11 @@ class _startButtonState extends State<startButton> {
 }
 
 class InGameButton extends StatefulWidget {
-
   final Function buttonLogic;
   final List<String> buttonNames;
 
-  InGameButton({
+  const InGameButton({
+    super.key,
     required this.buttonLogic,
     required this.buttonNames,
   });
@@ -64,19 +66,17 @@ class _InGameButtonState extends State<InGameButton> {
   void initState() {
     super.initState();
     for (int i = 0; i < widget.buttonNames.length; i++) {
-      buttonsList.add(
-       Padding(
-          padding: const EdgeInsets.fromLTRB(0,3,0,3),
-          child: SizedBox(
-            height: 60,
-            width: 70,
-            child: OutlinedButton(
-              onPressed: () => widget.buttonLogic(widget.buttonNames[i]),
-              child: Text(widget.buttonNames[i]),
+      buttonsList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+        child: SizedBox(
+          height: 60,
+          width: 70,
+          child: OutlinedButton(
+            onPressed: () => widget.buttonLogic(widget.buttonNames[i]),
+            child: Text(widget.buttonNames[i]),
           ),
-              ),
-        )
-      );
+        ),
+      ));
     }
   }
 
@@ -88,42 +88,13 @@ class _InGameButtonState extends State<InGameButton> {
           height: 200,
           width: 300,
           child: GridView.count(
+            physics: NeverScrollableScrollPhysics(),
             childAspectRatio: 2.5,
             crossAxisCount: 2,
             children: buttonsList,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 1, 0, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Press Z to store. Press Space to drop. Left, Down, and Right arrow key to navigate. Shift to rotate',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  )),
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 60,
-                  width: 120,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        Status.inGame = !Status.inGame;
-                      });
-                    },
-                    child: Text('Stop'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        StartButton(textStartbutton: "Stop", onTapButton: () {})
       ],
     );
   }

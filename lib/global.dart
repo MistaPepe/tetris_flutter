@@ -1,11 +1,12 @@
-import 'dart:ui';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Status{
+class Player{
 
   static bool inGame = false;
   static int score = 0;
+
 }
 
-class Theme{
-static Color primaryColor = Color(0xFF2196F3);
-}
+final playerProvider = Provider((ref){
+  return Player;
+});

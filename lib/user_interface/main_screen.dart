@@ -14,20 +14,33 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   List<String> _keysButtons = [
+    'Shift',
+    'Switch',
     'Left',
     'Right',
     'Down',
     'Drop',
-    'Shift',
-    'Switch',
   ];
-  
+
   List<Widget> _nextBlockLayout = [];
 
   @override
   void initState() {
-    for(int i = 0; i < 5; i++) {_nextBlockLayout.add(NextBlock(i));};
+    for (int i = 0; i < 5; i++) {
+      _nextBlockLayout.add(NextBlock(i));
+    }
     super.initState();
+  }
+
+  Widget getPlayButton() {
+    if (!Player.inGame) {
+      return InGameButton(
+        buttonLogic: (text) => print(text),
+        buttonNames: _keysButtons,
+      );
+    } else {
+      return StartButton(onTapButton: (){},textStartbutton: "Start",);
+    }
   }
 
   @override
@@ -43,47 +56,41 @@ class _MainScreenState extends State<MainScreen> {
         )),
       ),
       body: SingleChildScrollView(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
           children: [
-            Spacer(
-              flex: 1,
-            ),
-            Container(
-              height: 70,
-              width: 70,
-              color: Colors.blueAccent,
-            ),
-            Spacer(
-              flex: 1,
-            ),
-            Expanded(
-              flex:12,
-              child: Column(
-                children: <Widget>[
-                    SizedBox(
-                      child: GridBlock(),
-                      height: 550,
-                      width: 300,
-                    
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Spacer(
+                    flex: 1,
                   ),
-                  InGameButton(
-                    buttonLogic: (text) => print(text),
-                    buttonNames: _keysButtons,
+                  Flexible(child: ReserveBlock(0), flex: 7),
+                  Spacer(
+                    flex: 1,
+                  ),
+                  Expanded(
+                    flex: 30,
+                    child: GridBlock(),
+                  ),
+                  Spacer(
+                    flex: 1,
+                  ),
+                  Flexible(
+                    flex: 7,
+                    child: Column(
+                      children: _nextBlockLayout,
+                    ),
+                  ),
+                  Spacer(
+                    flex: 1,
                   ),
                 ],
               ),
-            ),
-            Spacer(
-              flex: 1,
-            ),
-            Column(
-              children: _nextBlockLayout,
-            ),
-            Spacer(
-              flex: 1,
-            ),
+              Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: getPlayButton(),
+                        ),
           ],
         ),
       ),

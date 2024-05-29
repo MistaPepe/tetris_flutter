@@ -16,17 +16,16 @@ class _NextBlockState extends State<NextBlock> {
       child: Container(
                   height: 70,
                   width: 70,
-                  color: Colors.grey,
+                  color: Colors.white12,
               ),
     );
   }
 }
 
 
-
-
 class ReserveBlock extends StatefulWidget {
-  const ReserveBlock({super.key});
+  final int blockReserve;
+  const ReserveBlock(this.blockReserve);
 
   @override
   State<ReserveBlock> createState() => _ReserveBlockState();
@@ -38,7 +37,7 @@ class _ReserveBlockState extends State<ReserveBlock> {
     return  Container(
                 height: 70,
                 width: 70,
-                color: Colors.grey,
+                color: Colors.white12,
             );
   }
 }

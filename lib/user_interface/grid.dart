@@ -1,58 +1,55 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tetris_flutter/user_interface/blocks.dart';
 
-class GridBlock extends StatefulWidget {
+class GridBlock extends ConsumerStatefulWidget {
   const GridBlock({super.key});
 
   @override
-  State<GridBlock> createState() => _GridBlockState();
+  ConsumerState<GridBlock> createState() => _GridBlockState();
 }
 
-class _GridBlockState extends State<GridBlock> {
+class _GridBlockState extends ConsumerState<GridBlock> {
+  static List<Widget> eachBox = [];
+  static int aytemkawnt = 180;
+  GridListBuilder? gridList;
+
+  @override
+  void initState() {
+    for (int i = 0; i < aytemkawnt; i++) {
+      eachBox.add(GestureDetector(
+        onTap: () {print(i);},
+        child: Container(
+          color: (i < 170) ? ColorBlockPick(
+                  colorIndex:
+                      BlockValueGenerator(index: i, itemCount: aytemkawnt)
+                          .blockGenerator())
+                          .getColorBlock() : Colors.pinkAccent,
+        ),
+      ));
+    }
+    gridList = GridListBuilder(eachBox, aytemkawnt);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 10),
-      itemCount: 180,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.all(1),
-          child: Container(
-            color: ColorBlockPick(0).getColorBlock(),
-            constraints: BoxConstraints(maxHeight: 10, maxWidth: 10),
-          ),
-        );
-      },
+    return GridView.count(crossAxisCount: 10,
+
+    physics: const NeverScrollableScrollPhysics(),
+    shrinkWrap: true,
+    crossAxisSpacing: 1.5,
+    mainAxisSpacing: 1.5,
+    children: gridList?.eachBox != null ? eachBox : [],
     );
   }
 }
 
-class ColorBlockPick {
-  final int colorIndex;
-  ColorBlockPick(this.colorIndex);
+class GridListBuilder {
+  final List<Widget> eachBox;
+  final int aytemkawnt;
 
-  List<Color> colorBlock = [
-    Colors.lightBlue,
-    Color.fromARGB(255, 25, 11, 212),
-    Colors.orange,
-    Colors.yellow,
-    Colors.green,
-    Colors.purple,
-    Colors.red
-  ];
-  
-  Color getColorBlock(){
-    Color placeHolderColor = Colors.white10;
-    for(int i = 0; i < colorIndex; i++){
-      placeHolderColor = colorBlock[i];
-    }
-    return placeHolderColor;
-  }
+  GridListBuilder(this.eachBox, this.aytemkawnt);
 }
 
-class BlockValue{
-  
 
-}
