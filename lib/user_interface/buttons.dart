@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StartButton extends StatefulWidget {
+class StartButton extends ConsumerStatefulWidget {
   final String textStartbutton;
   final Function onTapButton;
   const StartButton(
       {super.key, required this.textStartbutton, required this.onTapButton});
 
   @override
-  State<StartButton> createState() => _StartButtonState();
+  ConsumerState<StartButton> createState() => _StartButtonState();
 }
 
-class _StartButtonState extends State<StartButton> {
+class _StartButtonState extends ConsumerState<StartButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -45,7 +46,7 @@ class _StartButtonState extends State<StartButton> {
   }
 }
 
-class InGameButton extends StatefulWidget {
+class InGameButton extends ConsumerStatefulWidget {
   final Function buttonLogic;
   final List<String> buttonNames;
 
@@ -56,11 +57,12 @@ class InGameButton extends StatefulWidget {
   });
 
   @override
-  State<InGameButton> createState() => _InGameButtonState();
+  ConsumerState<InGameButton> createState() => _InGameButtonState();
 }
 
-class _InGameButtonState extends State<InGameButton> {
+class _InGameButtonState extends ConsumerState<InGameButton> {
   List<Widget> buttonsList = [];
+
 
   @override
   void initState() {
