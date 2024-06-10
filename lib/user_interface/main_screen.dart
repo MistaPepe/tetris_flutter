@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tetris_flutter/global.dart' as global;
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/buttons.dart';
 import 'package:tetris_flutter/user_interface/uppper_row.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
+  final Map<String, Color> theme = {"background": Colors.black12};
 
-  Color theme = Colors.black12;
-  List<String> _keysButtons = [
+  final List<String> _keysButtons = [
     'Shift',
     'Switch',
     'Left',
@@ -24,48 +25,47 @@ class _MainScreenState extends State<MainScreen> {
     'Drop',
   ];
 
-  List<Widget> _nextBlockLayout = [
-    for (int i = 0; i < 5; i++) 
-      NextBlock(i)
-    ];
+  List<Widget> nextBlockLayout = [
+    for (int i = 0; i < 5; i++) NextBlock(i)
+  ];
 
-final List<Widget> blockLayout = [
-  for (int i = 0; i < 180; i++)
-    if (global.Player.inGame)
-      Container(color: Colors.blueAccent)
-    else
-      Container(color: Colors.white10),
-];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  List<Widget> blockLayout = [
+    for (int i = 0; i < 180; i++)
+      if (global.Player.inGame)
+        Container(color: Colors.blueAccent)
+      else
+        Container(color: Colors.white10),
+  ];
 
   Widget getPlayButton() {
-    if (!global.Player.inGame) {
+    if (global.Player.inGame) {
       return InGameButton(
         buttonLogic: (text) {
-     
-         setState(() {
-      
-         });
+            setState(() {
+              global.Player.inGame =!global.Player.inGame;
+            });
         },
         buttonNames: _keysButtons,
       );
     } else {
-      return StartButton(onTapButton: (){},textStartbutton: "Start",);
+      return StartButton(
+        onTapButton: () {
+          setState(() {
+            global.Player.inGame = !global.Player.inGame;
+          });
+        },
+        textStartbutton: "Start",
+      );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black12,
+      backgroundColor: theme["background"],
       appBar: AppBar(
-        backgroundColor: theme,
-        title: Center(
+        backgroundColor: theme["background"],
+        title: const Center(
             child: Text(
           'Tetris',
           style: TextStyle(color: Colors.white),
@@ -78,41 +78,48 @@ final List<Widget> blockLayout = [
             Flexible(
               child: SizedBox(
                 width: 500,
+                height: 1000,
                 child: Column(
                   children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Spacer(
-                            flex: 1,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Spacer(
+                          flex: 1,
+                        ),
+                        const Flexible(flex: 7,child: ReserveBlock(0)),
+                        const Spacer(
+                          flex: 1,
+                        ),
+                        Expanded(
+                          flex: 30,
+                          child: GridBlock(eachBox: blockLayout),
+                        ),
+                        const Spacer(
+                          flex: 1,
+                        ),
+                        Flexible(
+                          flex: 7,
+                          child: Column(
+                            children: nextBlockLayout,
                           ),
-                          Flexible(child: ReserveBlock(0), flex: 7),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Expanded(
-                            flex: 30,
-                            child: GridBlock(eachBox: blockLayout),
-                          ),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Flexible(
-                            flex: 7,
-                            child: Column(
-                              children: _nextBlockLayout,
-                            ),
-                          ),
-                          Spacer(
-                            flex: 1,
-                          ),
-                        ],
+                        ),
+                        const Spacer(
+                          flex: 1,
+                        ),
+                      ],
+                    ),
+                    const Spacer(
+                      flex: 1,
+                    ),
+                    Flexible(
+                      flex: 12,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: SizedBox(child: getPlayButton()),
                       ),
-                      Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: getPlayButton(),
-                                ),
+                    ),
                   ],
                 ),
               ),
@@ -123,4 +130,3 @@ final List<Widget> blockLayout = [
     );
   }
 }
-

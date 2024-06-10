@@ -19,7 +19,8 @@ class _StartButtonState extends ConsumerState<StartButton> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
+          const Spacer(),
+         const Expanded(
               flex: 3,
               child: Text(
                 'Left, Down, and Right arrow key to navigate. Shift to rotate. Z to switch. Press Space to drop.',
@@ -33,13 +34,12 @@ class _StartButtonState extends ConsumerState<StartButton> {
               height: 60,
               width: 120,
               child: OutlinedButton(
-                onPressed: () {
-                  setState(() {});
-                },
-                child: Text('Start'),
+                onPressed: () => widget.onTapButton(),
+                child: Text(widget.textStartbutton),
               ),
             ),
           ),
+          const Spacer(),
         ],
       ),
     );
@@ -90,13 +90,14 @@ class _InGameButtonState extends ConsumerState<InGameButton> {
           height: 200,
           width: 300,
           child: GridView.count(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             childAspectRatio: 2.5,
             crossAxisCount: 2,
             children: buttonsList,
           ),
         ),
-        StartButton(textStartbutton: "Stop", onTapButton: () {})
+        StartButton(textStartbutton: "Stop", 
+        onTapButton: () => widget.buttonLogic('Stop'),),
       ],
     );
   }
