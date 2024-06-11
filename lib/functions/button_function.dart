@@ -1,15 +1,34 @@
-import 'package:flutter/material.dart';
 
-class GameButtonLogic {
-
-  final String PressedButton;
-
-  GameButtonLogic(this.PressedButton);
+import 'package:tetris_flutter/provider/grid_block_provider.dart';
 
 
+class GameButtonLogic extends Grid{
 
-  Switch(PressedButton){
+  final String pressedButton;
+
+  GameButtonLogic(this.pressedButton);
 
 
+  function(){
+    switch(pressedButton){
+      case 'Shift':
+      print(blockLayout);
+      break;
+      case 'Switch':
+print(blockLayout);
+      break;
+      case 'Left':
+print(blockLayout);
+      break;
+      case 'Right':
+print(blockLayout);
+      break;
+      case 'Down':
+print(blockLayout);
+      break;
+      case 'Drop':
+print(blockLayout);
+      break;
+    }
   }
 }

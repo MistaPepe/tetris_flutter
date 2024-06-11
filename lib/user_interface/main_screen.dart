@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tetris_flutter/functions/button_function.dart';
 import 'package:tetris_flutter/global.dart' as global;
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/buttons.dart';
@@ -25,25 +26,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     'Drop',
   ];
 
-  List<Widget> nextBlockLayout = [
-    for (int i = 0; i < 5; i++) NextBlock(i)
-  ];
-
-  List<Widget> blockLayout = [
-    for (int i = 0; i < 180; i++)
-      if (global.Player.inGame)
-        Container(color: Colors.blueAccent)
-      else
-        Container(color: Colors.white10),
-  ];
+  List<Widget> nextBlockLayout = [for (int i = 0; i < 5; i++) NextBlock(i)];
 
   Widget getPlayButton() {
     if (global.Player.inGame) {
       return InGameButton(
         buttonLogic: (text) {
-            setState(() {
-              global.Player.inGame =!global.Player.inGame;
-            });
+          if(text == 'Stop'){setState(() {
+            global.Player.inGame = !global.Player.inGame;
+          });}
+          else {setState(() {
+
+            
+            //GameButtonLogic(text).function();
+          }); }
         },
         buttonNames: _keysButtons,
       );
@@ -61,6 +57,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final blockLayout = ref.watch(gridProvider);
+
     return Scaffold(
       backgroundColor: theme["background"],
       appBar: AppBar(
@@ -88,13 +86,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         const Spacer(
                           flex: 1,
                         ),
-                        const Flexible(flex: 7,child: ReserveBlock(0)),
+                        const Flexible(flex: 7, child: ReserveBlock(0)),
                         const Spacer(
                           flex: 1,
                         ),
                         Expanded(
                           flex: 30,
-                          child: GridBlock(eachBox: blockLayout),
+                          child: GridBlock(
+                              eachBox: blockLayout
+                                  .map((item) => item.container)
+                                  .toList()),
                         ),
                         const Spacer(
                           flex: 1,
