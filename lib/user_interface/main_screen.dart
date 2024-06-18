@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tetris_flutter/functions/button_function.dart';
+import 'package:tetris_flutter/provider/button_function.dart';
 import 'package:tetris_flutter/global.dart' as global;
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/buttons.dart';
@@ -15,8 +15,26 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  final Map<String, Color> theme = {"background": Colors.black12};
 
+  //general variable
+  int countTimer = 0;
+  Timer? timer;
+  final Map<String, Color> theme = {"background": Colors.black12};
+  
+  //timer variable
+  void _startCountdown(int setter) {
+    countTimer = setter;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        countTimer--;
+        if (countTimer == 0) {
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  //buttons Name
   final List<String> _keysButtons = [
     'Shift',
     'Switch',
@@ -26,33 +44,42 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     'Drop',
   ];
 
+  //next block
   List<Widget> nextBlockLayout = [for (int i = 0; i < 5; i++) NextBlock(i)];
 
-  Widget getPlayButton() {
-    if (global.Player.inGame) {
-      return InGameButton(
-        buttonLogic: (text) {
-          if(text == 'Stop'){setState(() {
-            global.Player.inGame = !global.Player.inGame;
-          });}
-          else {setState(() {
-
-            
-            //GameButtonLogic(text).function();
-          }); }
-        },
-        buttonNames: _keysButtons,
-      );
-    } else {
-      return StartButton(
-        onTapButton: () {
-          setState(() {
-            global.Player.inGame = !global.Player.inGame;
-          });
-        },
-        textStartbutton: "Start",
-      );
-    }
+  //start and stop button
+  Widget getPlayButton(WidgetRef ref) {
+    Widget button;
+    global.Player.inGame
+        ? button = InGameButton(
+            buttonLogic: (text) {
+              if (text == 'Stop') {
+                setState(() {
+                  global.Player.inGame = !global.Player.inGame;
+                });
+              } else {
+                setState(() {
+                  GameButtonLogic(pressedButton: text, ref: ref).function();
+                });
+              }
+            },
+            buttonNames: _keysButtons,
+          )
+        : button = StartButton(
+            onTapButton: () async {
+              setState(() {
+                _startCountdown(3);
+                global.Player.inGame = !global.Player.inGame;
+              });
+              Future.delayed(const Duration(seconds: 4), () {
+                setState(() {
+                  ref.read(gridProvider.notifier).automatedDownTimer();
+                });
+              });
+            },
+            textStartbutton: "Start",
+          );
+    return button;
   }
 
   @override
@@ -92,10 +119,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         ),
                         Expanded(
                           flex: 30,
-                          child: GridBlock(
-                              eachBox: blockLayout
-                                  .map((item) => item.container)
-                                  .toList()),
+                          child: Stack(
+                            children: [
+                              GridBlock(
+                                  eachBox: blockLayout
+                                      .map((item) => item.container)
+                                      .toList()),
+                              if (countTimer > 0)
+                                Positioned.fill(
+                                  child: Center(
+                                    child: Text(
+                                      countTimer.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 100.0, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                         const Spacer(
                           flex: 1,
@@ -118,7 +159,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       flex: 12,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 5),
-                        child: SizedBox(child: getPlayButton()),
+                        child: SizedBox(child: getPlayButton(ref)),
                       ),
                     ),
                   ],

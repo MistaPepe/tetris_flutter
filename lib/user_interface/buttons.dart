@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StartButton extends ConsumerStatefulWidget {
+// Button to start the game -----------------------------------------------------
+class StartButton extends StatelessWidget {
   final String textStartbutton;
   final Function onTapButton;
   const StartButton(
       {super.key, required this.textStartbutton, required this.onTapButton});
-
-  @override
-  ConsumerState<StartButton> createState() => _StartButtonState();
-}
-
-class _StartButtonState extends ConsumerState<StartButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -20,7 +15,7 @@ class _StartButtonState extends ConsumerState<StartButton> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
-         const Expanded(
+          const Expanded(
               flex: 3,
               child: Text(
                 'Left, Down, and Right arrow key to navigate. Shift to rotate. Z to switch. Press Space to drop.',
@@ -34,8 +29,8 @@ class _StartButtonState extends ConsumerState<StartButton> {
               height: 60,
               width: 120,
               child: OutlinedButton(
-                onPressed: () => widget.onTapButton(),
-                child: Text(widget.textStartbutton),
+                onPressed: () => onTapButton(),
+                child: Text(textStartbutton),
               ),
             ),
           ),
@@ -46,6 +41,8 @@ class _StartButtonState extends ConsumerState<StartButton> {
   }
 }
 
+
+// Buttons for control and stop button ----------------------------------------
 class InGameButton extends ConsumerStatefulWidget {
   final Function buttonLogic;
   final List<String> buttonNames;
@@ -61,14 +58,10 @@ class InGameButton extends ConsumerStatefulWidget {
 }
 
 class _InGameButtonState extends ConsumerState<InGameButton> {
-  List<Widget> buttonsList = [];
 
-
-  @override
-  void initState() {
-    super.initState();
-    for (int i = 0; i < widget.buttonNames.length; i++) {
-      buttonsList.add(Padding(
+  List<Widget> getButtonsList() {
+    return List.generate(widget.buttonNames.length, (i) {
+      return Padding(
         padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
         child: SizedBox(
           height: 60,
@@ -78,8 +71,8 @@ class _InGameButtonState extends ConsumerState<InGameButton> {
             child: Text(widget.buttonNames[i]),
           ),
         ),
-      ));
-    }
+      );
+    });
   }
 
   @override
@@ -93,11 +86,13 @@ class _InGameButtonState extends ConsumerState<InGameButton> {
             physics: const NeverScrollableScrollPhysics(),
             childAspectRatio: 2.5,
             crossAxisCount: 2,
-            children: buttonsList,
+            children: getButtonsList(),
           ),
         ),
-        StartButton(textStartbutton: "Stop", 
-        onTapButton: () => widget.buttonLogic('Stop'),),
+        StartButton(
+          textStartbutton: "Stop",
+          onTapButton: () => widget.buttonLogic('Stop'),
+        ),
       ],
     );
   }

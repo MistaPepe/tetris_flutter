@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tetris_flutter/global.dart';
@@ -36,21 +37,13 @@ class GridValue {
 
 @riverpod
 class Grid extends _$Grid {
-
   final List<GridValue> blockLayout = [
     for (int i = 0; i < 180; i++)
-      if (Player.inGame)
-        GridValue(
-            isPlayer: true,
-            value: i,
-            container:
-                Container(color: ColorBlockPick(colorIndex: 1).getColorBlock()))
-      else
-        GridValue(
-            isPlayer: true,
-            value: i,
-            container:
-                Container(color: ColorBlockPick(colorIndex: 0).getColorBlock()))
+      GridValue(
+          isPlayer: false,
+          value: i,
+          container:
+              Container(color: ColorBlockPick(colorIndex: 0).getColorBlock()))
   ];
 
   @override
@@ -58,17 +51,41 @@ class Grid extends _$Grid {
     return blockLayout;
   }
 
+  void automatedDownTimer() {
+      generateBlock();
+      if (state.where((gridValue) => gridValue.isPlayer).any((_) => true)) {
+        Timer.periodic(const Duration(seconds: 2), (timer) {
+          if(!Player.inGame) {timer.cancel();}
+          final List<int> indices = [];
+          for (var i = 0; i < state.length; i++) {
+            if (state[i].isPlayer) {
+              print(i);
+              indices.add(i);
+            }
+          }
+        }
+        );
+    }
+  }
+
   void generateBlock() {
-     blockLayout[10] = GridValue(
-            isPlayer: true,
-            value: 1,
-            container:
-                Container(color: ColorBlockPick(colorIndex: 2).getColorBlock()));
+
+    for (int i = 4; i < 6; i++) {
+      state[i] = GridValue(
+          isPlayer: true,
+          value: i,
+          container:
+              Container(color: ColorBlockPick(colorIndex: 1).getColorBlock()));
+    }
   }
 
   void clearRow() {}
 
-  void moveBlock() {}
+  void moveRight() {}
+
+  void moveLeft() {}
+
+  void moveDown() {}
 
   void rotateBlock() {}
 
