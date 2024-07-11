@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class NextBlock extends StatefulWidget {
   final int index;
-  const NextBlock(this.index);
+  const NextBlock(this.index, {super.key});
 
   @override
   State<NextBlock> createState() => _NextBlockState();
@@ -25,7 +25,7 @@ class _NextBlockState extends State<NextBlock> {
 
 class ReserveBlock extends StatefulWidget {
   final int blockReserve;
-  const ReserveBlock(this.blockReserve);
+  const ReserveBlock(this.blockReserve, {super.key});
 
   @override
   State<ReserveBlock> createState() => _ReserveBlockState();

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tetris_flutter/provider/button_function.dart';
 import 'package:tetris_flutter/global.dart' as global;
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
+import 'package:tetris_flutter/user_interface/blocks.dart';
 import 'package:tetris_flutter/user_interface/buttons.dart';
 import 'package:tetris_flutter/user_interface/uppper_row.dart';
 
@@ -15,12 +15,11 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-
   //general variable
   int countTimer = 0;
   Timer? timer;
   final Map<String, Color> theme = {"background": Colors.black12};
-  
+
   //timer variable
   void _startCountdown(int setter) {
     countTimer = setter;
@@ -47,21 +46,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   //next block
   List<Widget> nextBlockLayout = [for (int i = 0; i < 5; i++) NextBlock(i)];
 
-  //start and stop button
-  Widget getPlayButton(WidgetRef ref) {
+  //start and stop buttons
+  Widget getPlayButton() {
+
     Widget button;
-    global.Player.inGame
+    (global.Player.inGame)
         ? button = InGameButton(
             buttonLogic: (text) {
-              if (text == 'Stop') {
-                setState(() {
+              setState(() {
+                if (text == 'Stop') {
                   global.Player.inGame = !global.Player.inGame;
-                });
-              } else {
-                setState(() {
-                  GameButtonLogic(pressedButton: text, ref: ref).function();
-                });
-              }
+                } else {
+               ref.read(gridProvider.notifier).buttonFunctionForOuterUse(text);
+                }
+              });
             },
             buttonNames: _keysButtons,
           )
@@ -72,9 +70,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 global.Player.inGame = !global.Player.inGame;
               });
               Future.delayed(const Duration(seconds: 4), () {
-                setState(() {
-                  ref.read(gridProvider.notifier).automatedDownTimer();
-                });
+                ref.read(gridProvider.notifier).startGame();
               });
             },
             textStartbutton: "Start",
@@ -82,10 +78,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return button;
   }
 
+
   @override
   Widget build(BuildContext context) {
-    final blockLayout = ref.watch(gridProvider);
-
     return Scaffold(
       backgroundColor: theme["background"],
       appBar: AppBar(
@@ -122,9 +117,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                           child: Stack(
                             children: [
                               GridBlock(
-                                  eachBox: blockLayout
-                                      .map((item) => item.container)
-                                      .toList()),
+                                eachBox: ref
+                                    .watch(gridProvider)
+                                    .map((item) => item.container)
+                                    .toList(),
+                              ),
                               if (countTimer > 0)
                                 Positioned.fill(
                                   child: Center(
@@ -159,7 +156,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       flex: 12,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 5),
-                        child: SizedBox(child: getPlayButton(ref)),
+                        child: SizedBox(child: getPlayButton()),
                       ),
                     ),
                   ],

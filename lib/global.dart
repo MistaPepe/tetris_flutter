@@ -1,13 +1,9 @@
 
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/material.dart';
 
-class Player{
+class Player extends ChangeNotifier{
 
   static bool inGame = false;
   static int score = 0;
 
 }
-
-final playerProvider = Provider((ref){
-  return Player;
-});

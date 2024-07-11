@@ -1,93 +1,236 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tetris_flutter/global.dart';
+import 'package:tetris_flutter/provider/button_function.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
 
 part 'grid_block_provider.g.dart';
 
-class GridBlock extends StatelessWidget {
-  final List<Widget> eachBox;
-  const GridBlock({super.key, required this.eachBox});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GridView.count(
-          crossAxisCount: 10,
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          crossAxisSpacing: 1.8,
-          mainAxisSpacing: 1.8,
-          children: eachBox,
-        ),
-      ],
-    );
-  }
-}
-
+///class initializer - what should be inside the list of blocks, List<Gridvalue> something like this//////////////////////////////////
 class GridValue {
   final bool isPlayer;
-  final int value;
+  final bool isBlock;
   final Widget container;
-  GridValue(
-      {required this.value, required this.container, required this.isPlayer});
+  const GridValue(
+      {required this.container, required this.isPlayer, required this.isBlock});
 }
 
+///generated notifier provider by riverpod////////////////////////////////
 @riverpod
 class Grid extends _$Grid {
-  final List<GridValue> blockLayout = [
-    for (int i = 0; i < 180; i++)
-      GridValue(
-          isPlayer: false,
-          value: i,
-          container:
-              Container(color: ColorBlockPick(colorIndex: 0).getColorBlock()))
-  ];
+  final int initialBlock = 30;
+  List<GridValue> initialBlockLayout() {
+    return [
+      for (int i = 0; i < 220; i++)
+        GridValue(
+            isPlayer: false,
+            isBlock: false,
+            container: GestureDetector(
+                onTap: () {
+                  print(i);
+                },
+                child: Container(
+                    color: BlockPicker(colorIndex: 0).getColorBlock())))
+    ];
+  }
 
   @override
   List<GridValue> build() {
-    return blockLayout;
+    return initialBlockLayout();
+  }
+
+// --------------automatic and repeating code-----------------
+
+  void startGame() async {
+    updateGrid();
+    generateBlock();
+    automatedDownTimer();
+    if (!Player.inGame) {
+      state = initialBlockLayout();
+      updateGrid();
+    }
+  }
+
+  List<int> checkRowFull(List<GridValue> currentState) {
+    List<int> placeholder = [];
+    for (int i = initialBlock; i < 220; i += 10) {
+      int holder = 0;
+      for (int row = i; row <= i + 10; row++) {
+        if (currentState[row].isBlock) {
+          holder++;
+        }
+        if (holder == 10) {
+          placeholder.add(i);
+        }
+      }
+    }
+    return placeholder;
   }
 
   void automatedDownTimer() {
-      generateBlock();
-      if (state.where((gridValue) => gridValue.isPlayer).any((_) => true)) {
-        Timer.periodic(const Duration(seconds: 2), (timer) {
-          if(!Player.inGame) {timer.cancel();}
-          final List<int> indices = [];
-          for (var i = 0; i < state.length; i++) {
-            if (state[i].isPlayer) {
-              print(i);
-              indices.add(i);
-            }
+    updateGrid();
+    // find if there are any player block in the state
+    if (state.where((gridValue) => gridValue.isPlayer).any((_) => true)) {
+      if (Player.inGame) {
+        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+          if (!Player.inGame) {
+            state = initialBlockLayout();
+            timer.cancel();
+            updateGrid();
+            return; // important to cancel timer immediately
           }
-        }
-        );
+          //logic for blocks automatic down
+
+          if (isValidPlace(state, findPlayer(), 'down')) {
+            moveDown(state, findPlayer()).then((value) => state = value);
+          } else {
+            timer.cancel();
+            Future.delayed(const Duration(seconds: 3), () async {
+              await placeBlock(state, findPlayer()).then((value) => value);
+              startGame();
+            });
+          }
+          updateGrid();
+        });
+      }
     }
   }
+
+// --------------event codes (validity, generating, and removing of blocks)-----------------
+  void updateGrid() {
+    state = [
+      ...state,
+      GridValue(
+          isPlayer: false,
+          isBlock: false,
+          container:
+              Container(color: BlockPicker(colorIndex: 0).getColorBlock()))
+    ];
+    state.removeLast();
+  }
+
+  static bool isValidPlace(
+      List<GridValue> currentState, List<int> currentPlayer, String movement) {
+    bool? result;
+    List<int> left() {
+      return [for (int i = 30; i <= 200; i += 10) i];
+    }
+
+    List<int> right() {
+      return [for (int i = 39; i <= 209; i += 10) i];
+    }
+
+    List<int> bottom() {
+      return [for (int i = 200; i <= 209; i++) i];
+    }
+
+    if (movement == "down") {
+      for (int i in currentPlayer) {
+        if (bottom().contains(i) ||
+            (currentState[i + 10].isBlock && !currentState[i + 10].isPlayer)) {
+          result = false;
+        }
+      }
+    }
+    if (movement == "Left") {
+      for (int i in currentPlayer) {
+        if (left().contains(i) ||
+            (currentState[i - 1].isBlock && !currentState[i - 1].isPlayer)) {
+          return false;
+        }
+      }
+    }
+
+    if (movement == "Right") {
+      for (int i in currentPlayer) {
+        if (right().contains(i) ||
+            (currentState[i + 1].isBlock && !currentState[i + 1].isPlayer)) {
+          return false;
+        }
+      }
+    }
+    return result ?? true;
+  }
+
+  Future<List<GridValue>> placeBlock(
+      List<GridValue> currentState, List<int> currentPlayer) async {
+    Widget containers = currentState
+        .firstWhere((gridValue) => gridValue.isPlayer)
+        .container; //get the color of the players container
+    for (int i in currentPlayer) {
+      currentState[i] =
+          GridValue(isPlayer: false, isBlock: true, container: containers);
+    }
+    return currentState;
+  }
+
+  static late int currentBlock;
 
   void generateBlock() {
-
-    for (int i = 4; i < 6; i++) {
-      state[i] = GridValue(
+    int pick = Random().nextInt(7) + 1;
+    currentBlock = 1;
+    for (var i in BlockPicker(colorIndex: 1).pickBlock().entries) {
+      state[i.key] = GridValue(
           isPlayer: true,
-          value: i,
-          container:
-              Container(color: ColorBlockPick(colorIndex: 1).getColorBlock()));
+          isBlock: true,
+          container: GestureDetector(
+              onTap: () {
+                print(state[i.key].isPlayer);
+              },
+              child: Container(color: i.value)));
     }
   }
 
-  void clearRow() {}
+  List<int> findPlayer() {
+    return [
+      for (var i = initialBlock; i < state.length; i++)
+        if (state[i].isPlayer) i
+    ];
+  }
 
-  void moveRight() {}
+  static Widget findContainerColor(List<GridValue> currentState) {
+    return currentState.firstWhere((gridValue) => gridValue.isPlayer).container;
+  }
 
-  void moveLeft() {}
+  void clearRow() {
+    for (int i = 200; i <= 209; i++) {
+      print(state[i].isBlock);
+    }
+    print("end line");
+  }
 
-  void moveDown() {}
+//---------------------Player movements------------------------
 
-  void rotateBlock() {}
+  void buttonFunctionForOuterUse(String text) async {
+    state = GameButtonLogic(
+            currentList: state,
+            currentPlayer: findPlayer(),
+            pressedButton: text)
+        .function();
+  }
 
-  void dropBlock() {}
+  Future<List<GridValue>> moveDown(
+      List<GridValue> currentState, List<int> currentPlayer) async {
+    Widget containers = findContainerColor(currentState);
+
+    for (int i = 0; i < currentPlayer.length; i++) {
+      currentState[currentPlayer[i]] = GridValue(
+          isPlayer: false,
+          isBlock: false,
+          container: GestureDetector(
+              onTap: () {
+                print(state[i].isPlayer);
+              },
+              child: Container(
+                  color: BlockPicker(colorIndex: 0).getColorBlock())));
+    }
+    for (int i = 0; i < currentPlayer.length; i++) {
+      currentState[currentPlayer[i] + 10] =
+          GridValue(isPlayer: true, isBlock: true, container: containers);
+    }
+
+    return currentState;
+  }
 }
