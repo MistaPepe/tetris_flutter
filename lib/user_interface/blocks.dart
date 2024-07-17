@@ -37,17 +37,17 @@ class BlockPicker extends ColorBlockPick {
         };
       case 2: // J Block
         return {
+          33: colorBlock[colorIndex],
           34: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
+          35: colorBlock[colorIndex],
           45: colorBlock[colorIndex],
-          46: colorBlock[colorIndex],
         };
       case 3: // L Block
         return {
+          33: colorBlock[colorIndex],
+          34: colorBlock[colorIndex],
           35: colorBlock[colorIndex],
           43: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
-          45: colorBlock[colorIndex],
         };
       case 4: // Square Block
         return {

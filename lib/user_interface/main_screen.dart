@@ -48,10 +48,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   //start and stop buttons
   Widget getPlayButton() {
-
-    Widget button;
+    return 
     (global.Player.inGame)
-        ? button = InGameButton(
+        ?  InGameButton(
             buttonLogic: (text) {
               setState(() {
                 if (text == 'Stop') {
@@ -63,7 +62,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
             buttonNames: _keysButtons,
           )
-        : button = StartButton(
+        : StartButton(
             onTapButton: () async {
               setState(() {
                 _startCountdown(3);
@@ -75,7 +74,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
             textStartbutton: "Start",
           );
-    return button;
   }
 
 

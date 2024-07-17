@@ -55,7 +55,7 @@ class Grid extends _$Grid {
 
   List<int> checkRowFull(List<GridValue> currentState) {
     List<int> placeholder = [];
-    for (int i = initialBlock; i < 220; i += 10) {
+    for (int i = initialBlock; i < 230; i += 10) {
       int holder = 0;
       for (int row = i; row <= i + 10; row++) {
         if (currentState[row].isBlock) {
@@ -83,7 +83,7 @@ class Grid extends _$Grid {
           }
           //logic for blocks automatic down
 
-          if (isValidPlace(state, findPlayer(), 'down')) {
+          if (isValidPlace(state, findPlayer(), 'Down')) {
             moveDown(state, findPlayer()).then((value) => state = value);
           } else {
             timer.cancel();
@@ -126,7 +126,7 @@ class Grid extends _$Grid {
       return [for (int i = 200; i <= 209; i++) i];
     }
 
-    if (movement == "down") {
+    if (movement == "Down") {
       for (int i in currentPlayer) {
         if (bottom().contains(i) ||
             (currentState[i + 10].isBlock && !currentState[i + 10].isPlayer)) {
@@ -151,6 +151,15 @@ class Grid extends _$Grid {
         }
       }
     }
+
+    if (movement == "Shift") {
+      //TODO
+      for (int i in currentPlayer) {
+        if ((currentState[i].isBlock && !currentState[i].isPlayer)) {
+          return false;
+        }
+      }
+    }
     return result ?? true;
   }
 
@@ -170,8 +179,8 @@ class Grid extends _$Grid {
 
   void generateBlock() {
     int pick = Random().nextInt(7) + 1;
-    currentBlock = 1;
-    for (var i in BlockPicker(colorIndex: 1).pickBlock().entries) {
+    currentBlock = 2;
+    for (var i in BlockPicker(colorIndex: currentBlock).pickBlock().entries) {
       state[i.key] = GridValue(
           isPlayer: true,
           isBlock: true,
@@ -185,7 +194,7 @@ class Grid extends _$Grid {
 
   List<int> findPlayer() {
     return [
-      for (var i = initialBlock; i < state.length; i++)
+      for (var i = 0; i < state.length; i++)
         if (state[i].isPlayer) i
     ];
   }
@@ -211,7 +220,7 @@ class Grid extends _$Grid {
         .function();
   }
 
-  Future<List<GridValue>> moveDown(
+  static Future<List<GridValue>> moveDown(
       List<GridValue> currentState, List<int> currentPlayer) async {
     Widget containers = findContainerColor(currentState);
 
@@ -220,9 +229,7 @@ class Grid extends _$Grid {
           isPlayer: false,
           isBlock: false,
           container: GestureDetector(
-              onTap: () {
-                print(state[i].isPlayer);
-              },
+              onTap: () {},
               child: Container(
                   color: BlockPicker(colorIndex: 0).getColorBlock())));
     }
