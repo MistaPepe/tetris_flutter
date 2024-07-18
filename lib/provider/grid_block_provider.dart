@@ -46,7 +46,7 @@ class Grid extends _$Grid {
   void startGame() async {
     updateGrid();
     generateBlock();
-    automatedDownTimer();
+   automatedDownTimer();
     if (!Player.inGame) {
       state = initialBlockLayout();
       updateGrid();
@@ -112,7 +112,7 @@ class Grid extends _$Grid {
   }
 
   static bool isValidPlace(
-      List<GridValue> currentState, List<int> currentPlayer, String movement) {
+      List<GridValue> currentState, List<int> currentPlayer, String movement,) {
     bool? result;
     List<int> left() {
       return [for (int i = 30; i <= 200; i += 10) i];
@@ -152,14 +152,6 @@ class Grid extends _$Grid {
       }
     }
 
-    if (movement == "Shift") {
-      //TODO
-      for (int i in currentPlayer) {
-        if ((currentState[i].isBlock && !currentState[i].isPlayer)) {
-          return false;
-        }
-      }
-    }
     return result ?? true;
   }
 
@@ -179,7 +171,7 @@ class Grid extends _$Grid {
 
   void generateBlock() {
     int pick = Random().nextInt(7) + 1;
-    currentBlock = 2;
+    currentBlock = pick;
     for (var i in BlockPicker(colorIndex: currentBlock).pickBlock().entries) {
       state[i.key] = GridValue(
           isPlayer: true,
