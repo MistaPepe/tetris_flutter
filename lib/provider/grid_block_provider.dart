@@ -8,7 +8,9 @@ import 'package:tetris_flutter/user_interface/blocks.dart';
 
 part 'grid_block_provider.g.dart';
 
-///class initializer - what should be inside the list of blocks, List<Gridvalue> something like this//////////////////////////////////
+typedef LiGrid = List<GridValue>;
+
+///class initializer - what should be inside the list of blocks, LiGrid something like this//////////////////////////////////
 class GridValue {
   final bool isPlayer;
   final bool isBlock;
@@ -21,7 +23,7 @@ class GridValue {
 @riverpod
 class Grid extends _$Grid {
   final int initialBlock = 30;
-  List<GridValue> initialBlockLayout() {
+  LiGrid initialBlockLayout() {
     return [
       for (int i = 0; i < 220; i++)
         GridValue(
@@ -31,29 +33,31 @@ class Grid extends _$Grid {
                 onTap: () {
                   print(i);
                 },
-                child: Container(
-                    color: BlockPicker(colorIndex: 0).getColorBlock())))
+                child:
+                    Container(color: BlockPicker(colorIndex: 0).getColorBlock)))
     ];
   }
 
   @override
-  List<GridValue> build() {
+  LiGrid build() {
     return initialBlockLayout();
   }
 
 // --------------automatic and repeating code-----------------
 
   void startGame() async {
+    await generateBlock();
     updateGrid();
-    generateBlock();
-   automatedDownTimer();
+    automatedDownTimer();
     if (!Player.inGame) {
       state = initialBlockLayout();
       updateGrid();
     }
   }
 
-  List<int> checkRowFull(List<GridValue> currentState) {
+  static late int currentBlock;
+
+  List<int> checkRowFull(LiGrid currentState) {
     List<int> placeholder = [];
     for (int i = initialBlock; i < 230; i += 10) {
       int holder = 0;
@@ -98,33 +102,54 @@ class Grid extends _$Grid {
     }
   }
 
+//TODO: fucking hell
+  void highLightDrop() {
+    // logic for highlighting drop zone
+    List<int> player = findPlayer();
+    while (isValidPlace(state, player, 'Down')) {
+      for (int i = 0; i < 4; i++) {
+        player[i] += 10;
+      }
+    }
+    for (int p in player) {
+      state[p] = GridValue(
+        isPlayer: false,
+        isBlock: false,
+        container: GestureDetector(
+            onTap: () {
+              print('Block tapped');
+            },
+            child: Container(
+                color: BlockPicker(colorIndex: currentBlock)
+                    .getHighLightedColorBlock)),
+      );
+    }
+  }
+
 // --------------event codes (validity, generating, and removing of blocks)-----------------
   void updateGrid() {
+    highLightDrop();
     state = [
       ...state,
       GridValue(
           isPlayer: false,
           isBlock: false,
-          container:
-              Container(color: BlockPicker(colorIndex: 0).getColorBlock()))
+          container: Container(color: BlockPicker(colorIndex: 0).getColorBlock))
     ];
     state.removeLast();
   }
 
   static bool isValidPlace(
-      List<GridValue> currentState, List<int> currentPlayer, String movement,) {
+    LiGrid currentState,
+    List<int> currentPlayer,
+    String movement,
+  ) {
     bool? result;
-    List<int> left() {
-      return [for (int i = 30; i <= 200; i += 10) i];
-    }
+    List<int> left() => [for (int i = 30; i <= 200; i += 10) i];
 
-    List<int> right() {
-      return [for (int i = 39; i <= 209; i += 10) i];
-    }
+    List<int> right() => [for (int i = 39; i <= 209; i += 10) i];
 
-    List<int> bottom() {
-      return [for (int i = 200; i <= 209; i++) i];
-    }
+    List<int> bottom() => [for (int i = 200; i <= 209; i++) i];
 
     if (movement == "Down") {
       for (int i in currentPlayer) {
@@ -138,7 +163,7 @@ class Grid extends _$Grid {
       for (int i in currentPlayer) {
         if (left().contains(i) ||
             (currentState[i - 1].isBlock && !currentState[i - 1].isPlayer)) {
-          return false;
+          result = false;
         }
       }
     }
@@ -147,19 +172,25 @@ class Grid extends _$Grid {
       for (int i in currentPlayer) {
         if (right().contains(i) ||
             (currentState[i + 1].isBlock && !currentState[i + 1].isPlayer)) {
-          return false;
+          result = false;
         }
       }
+    }
+
+    if (movement == "Shift") {
+      int i = 0;
+      int r = 0;
+      if (left().any((element) => currentPlayer.contains(element))) i++;
+      if (right().any((element) => currentPlayer.contains(element))) r++;
+      if (i != 0 && r != 0) return false;
     }
 
     return result ?? true;
   }
 
-  Future<List<GridValue>> placeBlock(
-      List<GridValue> currentState, List<int> currentPlayer) async {
-    Widget containers = currentState
-        .firstWhere((gridValue) => gridValue.isPlayer)
-        .container; //get the color of the players container
+  Future<LiGrid> placeBlock(
+      LiGrid currentState, List<int> currentPlayer) async {
+    Widget containers = findContainerColor(currentState);
     for (int i in currentPlayer) {
       currentState[i] =
           GridValue(isPlayer: false, isBlock: true, container: containers);
@@ -167,31 +198,21 @@ class Grid extends _$Grid {
     return currentState;
   }
 
-  static late int currentBlock;
-
-  void generateBlock() {
+  Future generateBlock() async{
     int pick = Random().nextInt(7) + 1;
     currentBlock = pick;
     for (var i in BlockPicker(colorIndex: currentBlock).pickBlock().entries) {
       state[i.key] = GridValue(
-          isPlayer: true,
-          isBlock: true,
-          container: GestureDetector(
-              onTap: () {
-                print(state[i.key].isPlayer);
-              },
-              child: Container(color: i.value)));
+          isPlayer: true, isBlock: true, container: Container(color: i.value));
     }
   }
 
-  List<int> findPlayer() {
-    return [
-      for (var i = 0; i < state.length; i++)
-        if (state[i].isPlayer) i
-    ];
-  }
+  List<int> findPlayer() => [
+        for (var i = 0; i < state.length; i++)
+          if (state[i].isPlayer) i
+      ];
 
-  static Widget findContainerColor(List<GridValue> currentState) {
+  static Widget findContainerColor(LiGrid currentState) {
     return currentState.firstWhere((gridValue) => gridValue.isPlayer).container;
   }
 
@@ -204,16 +225,17 @@ class Grid extends _$Grid {
 
 //---------------------Player movements------------------------
 
-  void buttonFunctionForOuterUse(String text) async {
-    state = GameButtonLogic(
+  void buttonFunction(String text) async {
+    state = await GameButtonLogic(
             currentList: state,
             currentPlayer: findPlayer(),
             pressedButton: text)
         .function();
+        updateGrid();
   }
 
-  static Future<List<GridValue>> moveDown(
-      List<GridValue> currentState, List<int> currentPlayer) async {
+  static Future<LiGrid> moveDown(
+      LiGrid currentState, List<int> currentPlayer) async {
     Widget containers = findContainerColor(currentState);
 
     for (int i = 0; i < currentPlayer.length; i++) {
@@ -222,8 +244,8 @@ class Grid extends _$Grid {
           isBlock: false,
           container: GestureDetector(
               onTap: () {},
-              child: Container(
-                  color: BlockPicker(colorIndex: 0).getColorBlock())));
+              child:
+                  Container(color: BlockPicker(colorIndex: 0).getColorBlock)));
     }
     for (int i = 0; i < currentPlayer.length; i++) {
       currentState[currentPlayer[i] + 10] =

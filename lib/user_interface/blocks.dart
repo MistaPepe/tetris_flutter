@@ -17,8 +17,22 @@ abstract class ColorBlockPick {
     Colors.red,
   ];
 
-  Color getColorBlock() {
+  final List<Color> highLightedBlock = [
+    const Color.fromARGB(255, 118, 211, 255),
+    const Color.fromARGB(255, 105, 97, 207),
+    const Color.fromARGB(255, 255, 187, 86),
+    const Color.fromARGB(255, 255, 240, 107),
+    const Color.fromARGB(255, 126, 170, 128),
+    const Color.fromARGB(255, 154, 99, 163),
+    const Color.fromARGB(255, 229, 136, 130),
+  ];
+
+  Color get getColorBlock {
     return colorBlock[colorIndex];
+  }
+
+  Color get getHighLightedColorBlock {
+    return highLightedBlock[colorIndex-1];
   }
 }
 

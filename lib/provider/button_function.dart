@@ -1,13 +1,13 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
 
+typedef Li = List<int>;
+
 class GameButtonLogic {
   final String pressedButton;
   List<GridValue> currentList;
-  final List<int> currentPlayer;
+  final Li currentPlayer;
   GameButtonLogic(
       {required this.currentList,
       required this.currentPlayer,
@@ -16,25 +16,29 @@ class GameButtonLogic {
   final blankBox = GridValue(
       isPlayer: false,
       isBlock: false,
-      container: Container(color: BlockPicker(colorIndex: 0).getColorBlock()));
+      container: Container(color: BlockPicker(colorIndex: 0).getColorBlock));
 
   final currentBox = GridValue(
       isPlayer: true,
       isBlock: true,
       container: Container(
-          color: BlockPicker(colorIndex: Grid.currentBlock).getColorBlock()));
+          color: BlockPicker(colorIndex: Grid.currentBlock).getColorBlock));
 
-  void clearCurrent(List<int> player) {
+  void clearCurrent(Li player) {
     for (int i in player) {
       currentList[i] = blankBox;
     }
   }
 
-  List<GridValue> function() {
+  Future<List<GridValue>> function()async {
     if (Grid.isValidPlace(currentList, currentPlayer, pressedButton)) {
       switch (pressedButton) {
-        case 'Shift': //-----------------rotate
+        case 'Shift':
+
+          ///-----------------rotate
           rotate();
+
+          /// see below for code
           break;
         case 'Switch':
           break;
@@ -61,6 +65,15 @@ class GameButtonLogic {
     return currentList;
   }
 
+  ///
+
+
+
+
+
+
+  ///rotation logic
+
   bool isVertical() {
     return (currentPlayer.last - currentPlayer.first > 15) ? true : false;
   }
@@ -76,9 +89,10 @@ class GameButtonLogic {
     }
   }
 
+//TODO: change all of this
   rotate() {
     ///Reference https://tetris.fandom.com/wiki/SRS?file=SRS-pieces.png
-    List<int> newPlayerList = [];
+    Li newPlayerList = [];
     int center = 0;
     clearCurrent(currentPlayer);
     switch (Grid.currentBlock) {
@@ -86,12 +100,12 @@ class GameButtonLogic {
         if (isVertical()) {
           for (int i = 0; i < 4; i++) {
             newPlayerList.add(currentPlayer[2] - 1 + i);
-            center = 2;
+            center = 1;
           }
         } else {
           for (int i = 0; i < 4; i++) {
             newPlayerList.add(currentPlayer[1] - 20 + (i * 10));
-            center = 1;
+            center = 2;
           }
         }
         break;
@@ -103,7 +117,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[1] - 1 + i);
             }
             newPlayerList.add(currentPlayer[2] - 20);
-            center = 2;
+            center = 1;
           } else {
             /// Reference: 2nd rotation
             for (int i = 0; i < 3; i++) {
@@ -119,7 +133,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[2] - 10 + (i * 10));
             }
             newPlayerList.add(currentPlayer[0] + 2);
-            center = 2;
+            center = 1;
           } else {
             /// Reference: 3rd rotation
             for (int i = 0; i < 3; i++) {
@@ -138,7 +152,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[2] - 1 + i);
             }
             newPlayerList.add(currentPlayer[0] + 2);
-            center = 2;
+            center = 1;
           } else {
             /// Reference: 2nd Rotation
             for (int i = 0; i < 3; i++) {
@@ -154,7 +168,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[1] - 10 + (i * 10));
             }
             newPlayerList.add(currentPlayer[0] - 10);
-            center = 2;
+            center = 1;
           } else {
             /// Reference: 1st rotation
             for (int i = 0; i < 3; i++) {
@@ -204,7 +218,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[2] - 1 + i);
             }
             newPlayerList.add(currentPlayer[2] - 10);
-            center = 2;
+            center = 1;
           }
         } else {
           /// Reference 1st rotation
@@ -220,7 +234,7 @@ class GameButtonLogic {
               newPlayerList.add(currentPlayer[2] - 10 + (i * 10));
             }
             newPlayerList.add(currentPlayer[2] + 1);
-            center = 2;
+            center = 1;
           }
         }
         break;
@@ -244,57 +258,124 @@ class GameButtonLogic {
         }
         break;
     }
-    List<int> currentPlaceBlock = currentList
-        .where((element) => element.isBlock && !element.isPlayer)
-        .map((element) => currentList.indexOf(element))
-        .toList();
 
-    List<String> direction = [];
+    Li isColided(Li checkColision) {
+      return [
+        for (int i = 30; i < currentList.length; i++)
+          if (currentList[i].isBlock &&
+              !currentList[i].isPlayer &&
+              checkColision.contains(i))
+            i
+      ];
+    }
 
-    List<int> holderForChecking = newPlayerList;
-    check() {
-      if (currentPlaceBlock
-          .any((element) => holderForChecking.contains(element))) {
-        List<int> collision = currentPlaceBlock
-            .where((element) => holderForChecking.contains(element))
-            .toList();
-        int adjustment = 0;
-        for (int blocks in collision) {
-          for (int i = 0; i < 4; i++) {
-            if (blocks - holderForChecking[i] <= 9) {
-              direction.add('down');
-            } else if (holderForChecking[i] > blocks) {
-              direction.add('right');
-            } else if (holderForChecking[i] < blocks) {
-              direction.add('left');
+    Map<int, Li> boxAreaX(int centerBox) {
+      return {
+        -1: List.generate(3, (l) => centerBox - 11 + (10 * l)),
+        0: List.generate(3, (m) => centerBox - 10 + (10 * m)),
+        1: List.generate(3, (n) => centerBox - 9 + (10 * n)),
+      };
+    }
+
+    Map<int, Li> boxAreaY(int centerBox) {
+      return {
+        -1: List.generate(3, (i) => centerBox + 9 + i),
+        0: List.generate(3, (j) => centerBox - 1 + j),
+        1: List.generate(3, (k) => centerBox - 11 + k),
+      };
+    }
+
+    Li checkCollision() {
+      for (int i = 0; i < 2; i++) {
+        Li holderForChecking = newPlayerList;
+        List axisList = [
+          boxAreaX(holderForChecking[center]),
+          boxAreaY(holderForChecking[center])
+        ];
+        for (int collided in isColided(holderForChecking)) {
+          for (var entry in axisList[i].entries) {
+            int adjustment = 0;
+            int key = entry.key;
+            Li values = entry.value;
+            if (values.contains(collided)) {
+              switch (key) {
+                case -1:
+                  (i == 0) ? adjustment = 1 : adjustment = -10;
+                  break;
+                case 1:
+                  (i == 0) ? adjustment = -1 : adjustment = 10;
+                  break;
+                default:
+                  adjustment = -10;
+                  break;
+              }
             }
-          }
-          int countRight = 0;
-          int countLeft = 0;
-          int countDown = 0;
-
-          for (int i = 0; i < direction.length; i++) {
-            if (direction[i] == 'down') {
-              countDown++;
-            } else if (direction[i] == 'right') {
-              countRight++;
-            } else if (direction[i] == 'left') {
-              countLeft++;
+            Li adjustmentCheck() {
+              return [
+                for (int i = 0; i < 4; i++) newPlayerList[i] + adjustment
+              ];
             }
-          }
-          print(collision);
-          if(countDown >= 2){adjustment += 10;}
-          if(countRight >= 2){adjustment += 1;}
-          if(countLeft >= 2){adjustment -= 1;}
-          for (int i = 0; i < 4; i++) {
-            newPlayerList[i] = holderForChecking[i] + adjustment;
+            if (isColided(adjustmentCheck()).isEmpty) {
+              return holderForChecking = adjustmentCheck();
+            }
           }
         }
       }
-        for (int i in newPlayerList) {
-            currentList[i] = currentBox;
-          }
+      return currentPlayer;
     }
+
+    finalRotation() {
+      for (int i = 0; i < 4; i++) {
+        if (center == i) {
+          currentList[newPlayerList[i]] = GridValue(
+              isPlayer: true,
+              isBlock: true,
+              container:
+                  Container(color: BlockPicker(colorIndex: 7).getColorBlock));
+        } else {
+          currentList[newPlayerList[i]] = currentBox;
+        }
+      }
+    }
+
+    var counterAdjustment = 0;
+
+    check() {
+      while (!Grid.isValidPlace(currentList, newPlayerList, pressedButton) &&
+          counterAdjustment < 4) {
+        int location = 0;
+        int first = currentPlayer.first;
+        while ((first - location) % 10 != 0) {
+          location++;
+        }
+        if (location > 5) {
+          for (int i = 0; i < newPlayerList.length; i++) {
+            newPlayerList[i] = newPlayerList[i] - 1;
+          }
+        } else {
+          for (int i = 0; i < newPlayerList.length; i++) {
+            newPlayerList[i] = newPlayerList[i] + 1;
+          }
+        }
+        counterAdjustment++;
+      }
+
+      if (counterAdjustment == 4) {
+        for(int i = 0; i < 4; i++){
+          newPlayerList[i] = currentPlayer[i];
+        }
+        finalRotation();
+        return;
+      }
+
+      if (isColided(newPlayerList).isNotEmpty) {
+        newPlayerList = checkCollision();
+        check();
+      }
+
+      finalRotation();
+    }
+
     check();
   }
 }

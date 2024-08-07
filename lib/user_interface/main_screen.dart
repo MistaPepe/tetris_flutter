@@ -56,7 +56,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 if (text == 'Stop') {
                   global.Player.inGame = !global.Player.inGame;
                 } else {
-               ref.read(gridProvider.notifier).buttonFunctionForOuterUse(text);
+               ref.read(gridProvider.notifier).buttonFunction(text);
                 }
               });
             },
