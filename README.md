@@ -1,10 +1,13 @@
 # tetris_flutter
 
-A new Flutter project.
+Recreating Tetris games using dart and flutter
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+It is still in in single player. In future, i planned to implement an online vs. mode using firebase, deployed in web browser
+
+![image](https://github.com/user-attachments/assets/20179f77-2e2b-4c16-800e-26033dcc2894)
+
 
 A few resources to get you started if this is your first Flutter project:
 
