@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tetris_flutter/global.dart' as global;
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
 import 'package:tetris_flutter/user_interface/buttons.dart';
 import 'package:tetris_flutter/user_interface/uppper_row.dart';
+
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -15,26 +18,28 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+
+
+
   //general variable
-  int countTimer = 0;
-  Timer? timer;
+  int _countTimer = 0;
   final Map<String, Color> theme = {"background": Colors.black12};
 
   //timer variable
   void _startCountdown(int setter) {
-    countTimer = setter;
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _countTimer = setter;
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        countTimer--;
-        if (countTimer == 0) {
+        _countTimer--;
+        if (_countTimer == 0) {
           timer.cancel();
         }
       });
     });
   }
 
-  //buttons Name
-  final List<String> _keysButtons = [
+  //buttons and keyboard
+  static const List<String> _keysButtons = [
     'Shift',
     'Switch',
     'Left',
@@ -42,6 +47,33 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     'Down',
     'Drop',
   ];
+
+  Widget keyboardKeys(Widget body) {
+    return Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DownIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const LeftIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const RightIntent(),
+      LogicalKeySet(LogicalKeyboardKey.keyZ): const ShiftIntent(),
+      LogicalKeySet(LogicalKeyboardKey.keyX): const SwitchIntent(),
+      LogicalKeySet(LogicalKeyboardKey.space): const DropIntent(),
+
+    }, child: Actions(actions: {
+      DownIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Down')),
+        LeftIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Left')),
+        RightIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Right')),
+        ShiftIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Shift')),
+        SwitchIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Switch')),
+        DropIntent:CallbackAction(onInvoke: (intent) =>
+        ref.read(gridProvider.notifier).buttonFunction('Drop')),
+    }, child: Focus(child: body)));
+  }
+
 
   //next block
   List<Widget> nextBlockLayout = [for (int i = 0; i < 5; i++) NextBlock(i)];
@@ -89,7 +121,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           style: TextStyle(color: Colors.white),
         )),
       ),
-      body: SingleChildScrollView(
+      body: keyboardKeys( 
+      SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -120,11 +153,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                     .map((item) => item.container)
                                     .toList(),
                               ),
-                              if (countTimer > 0)
+                              if (_countTimer > 0)
                                 Positioned.fill(
                                   child: Center(
                                     child: Text(
-                                      countTimer.toString(),
+                                      _countTimer.toString(),
                                       style: const TextStyle(
                                           fontSize: 100.0, color: Colors.white),
                                     ),
@@ -163,7 +196,27 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ],
         ),
-      ),
+      ),)
     );
   }
+}
+
+
+class DownIntent extends Intent{
+  const DownIntent();
+}
+class LeftIntent extends Intent{
+  const LeftIntent();
+}
+class RightIntent extends Intent{
+  const RightIntent();
+}
+class ShiftIntent extends Intent{
+  const ShiftIntent();
+}
+class SwitchIntent extends Intent{
+  const SwitchIntent();
+}
+class DropIntent extends Intent{
+  const DropIntent();
 }

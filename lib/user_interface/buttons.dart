@@ -18,7 +18,7 @@ class StartButton extends StatelessWidget {
           const Expanded(
               flex: 3,
               child: Text(
-                'Left, Down, and Right arrow key to navigate. Shift to rotate. Z to switch. Press Space to drop.',
+                'Left, Down, and Right arrow key to navigate. Z to rotate. X to switch. Press Space to drop.',
                 style: TextStyle(
                   color: Colors.white,
                 ),

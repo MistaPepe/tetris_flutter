@@ -30,7 +30,7 @@ class GameButtonLogic {
     }
   }
 
-  Future<List<GridValue>> function()async {
+  Future<List<GridValue>> function() async {
     if (Grid.isValidPlace(currentList, currentPlayer, pressedButton)) {
       switch (pressedButton) {
         case 'Shift':
@@ -59,18 +59,14 @@ class GameButtonLogic {
               .then((value) => currentList = value);
           break;
         case 'Drop':
+          clearCurrent(currentPlayer);
+          currentList = Grid.highLightDrop(currentList,
+              fromButton: true, providedPlayer: currentPlayer);
           break;
       }
     }
     return currentList;
   }
-
-  ///
-
-
-
-
-
 
   ///rotation logic
 
@@ -89,7 +85,7 @@ class GameButtonLogic {
     }
   }
 
-//TODO: change all of this
+
   rotate() {
     ///Reference https://tetris.fandom.com/wiki/SRS?file=SRS-pieces.png
     Li newPlayerList = [];
@@ -259,15 +255,21 @@ class GameButtonLogic {
         break;
     }
 
+
     Li isColided(Li checkColision) {
       return [
         for (int i = 30; i < currentList.length; i++)
-          if (currentList[i].isBlock &&
+          if ((currentList[i].isBlock &&
               !currentList[i].isPlayer &&
-              checkColision.contains(i))
-            i
+              checkColision.contains(i)))
+            i,
+          for(int i = 210; i <= 220; i++) //for below border
+          if(checkColision.contains(i))
+          i
       ];
     }
+
+    
 
     Map<int, Li> boxAreaX(int centerBox) {
       return {
@@ -315,6 +317,7 @@ class GameButtonLogic {
                 for (int i = 0; i < 4; i++) newPlayerList[i] + adjustment
               ];
             }
+
             if (isColided(adjustmentCheck()).isEmpty) {
               return holderForChecking = adjustmentCheck();
             }
@@ -361,7 +364,7 @@ class GameButtonLogic {
       }
 
       if (counterAdjustment == 4) {
-        for(int i = 0; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
           newPlayerList[i] = currentPlayer[i];
         }
         finalRotation();

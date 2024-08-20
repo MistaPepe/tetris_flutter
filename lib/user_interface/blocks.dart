@@ -17,14 +17,14 @@ abstract class ColorBlockPick {
     Colors.red,
   ];
 
-  final List<Color> highLightedBlock = [
-    const Color.fromARGB(255, 118, 211, 255),
-    const Color.fromARGB(255, 105, 97, 207),
-    const Color.fromARGB(255, 255, 187, 86),
-    const Color.fromARGB(255, 255, 240, 107),
-    const Color.fromARGB(255, 126, 170, 128),
-    const Color.fromARGB(255, 154, 99, 163),
-    const Color.fromARGB(255, 229, 136, 130),
+ static const List<Color> highLightedBlock = [
+    Color.fromARGB(136, 118, 212, 255),
+    Color.fromARGB(143, 104, 97, 207),
+    Color.fromARGB(123, 255, 187, 86),
+    Color.fromARGB(113, 255, 240, 107),
+    Color.fromARGB(127, 126, 170, 128),
+    Color.fromARGB(176, 154, 99, 163),
+    Color.fromARGB(122, 229, 137, 130),
   ];
 
   Color get getColorBlock {
