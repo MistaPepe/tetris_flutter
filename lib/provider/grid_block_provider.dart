@@ -5,8 +5,7 @@ import 'package:tetris_flutter/provider/global.dart';
 import 'package:tetris_flutter/provider/button_function.dart';
 import 'package:tetris_flutter/provider/blank_boxes_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
-import 'package:tetris_flutter/user_interface/main_screen.dart';
-import 'package:tetris_flutter/user_interface/main_screen.dart' as main_screen;
+
 
 part 'grid_block_provider.g.dart';
 

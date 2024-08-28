@@ -3,7 +3,7 @@ import 'package:tetris_flutter/provider/blank_boxes_provider.dart';
 
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
-import 'package:tetris_flutter/user_interface/reserve_next_box.dart';
+
 
 typedef Li = List<int>;
 
