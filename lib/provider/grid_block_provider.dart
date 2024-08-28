@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tetris_flutter/global.dart';
+import 'package:tetris_flutter/provider/global.dart';
 import 'package:tetris_flutter/provider/button_function.dart';
+import 'package:tetris_flutter/provider/blank_boxes_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
-
+import 'package:tetris_flutter/user_interface/main_screen.dart';
+import 'package:tetris_flutter/user_interface/main_screen.dart' as main_screen;
 
 part 'grid_block_provider.g.dart';
-
-
 
 typedef LiGrid = List<GridValue>;
 
@@ -41,6 +40,7 @@ class Grid extends _$Grid {
   }
 
   ///static and data encoders
+
   static int blocksGenerated = 0;
 
   static int downTimerSpeed = 2000;
@@ -58,23 +58,24 @@ class Grid extends _$Grid {
 
 // --------------automatic and repeating code-----------------
 
-//TODO: fix timer
-
   void startGame() async {
+    ref.read(blockQueueProvider.notifier).firstGenerateQueue();
     generateBlock();
     updateGrid();
-    Future.doWhile(() async {
+    await Future.doWhile(() async {
       await downTimer(blocksGenerated);
       return checkIfInGame();
     });
   }
 
   bool checkIfInGame() {
-    if (!Player.inGame) {
+    if (!inGame) {
       blocksGenerated = 0;
       downTimerSpeed = 2000;
       state = initialBlockLayout();
       updateGrid();
+      ref.read(blockQueueProvider.notifier).emptyQueue();
+      ref.read(reserveBlockProvider.notifier).restartBlock();
       return false;
     }
     return true;
@@ -103,8 +104,10 @@ class Grid extends _$Grid {
               countdown--;
             } else {
               isBottom = false;
-              placeBlock(state, findPlayer(state))
-                  .then((value) => state = value);
+              await placeBlock(state, findPlayer(state)).then((value) {
+                ref.read(blockQueueProvider.notifier).removeFirstAddAnother();
+                return state = value;
+              });
               checkRowFull();
               generateBlock();
             }
@@ -117,7 +120,6 @@ class Grid extends _$Grid {
 
   static LiGrid highLightDrop(LiGrid currentState,
       {bool fromButton = false, List<int>? providedPlayer}) {
-    if (!Player.inGame) return currentState; // important to cancel immediately
     // logic for highlighting drop zone
     List<int> player = providedPlayer ?? findPlayer(currentState);
     currentState.asMap().forEach((index, element) {
@@ -201,7 +203,7 @@ class Grid extends _$Grid {
       }
     }
 
-    if (movement == "Shift") {
+    if (movement == "Rotate" || movement == "Switch") {
       int i = 0;
       int r = 0;
       if (left().any((element) => currentPlayer.contains(element))) i++;
@@ -223,17 +225,45 @@ class Grid extends _$Grid {
   }
 
   Future generateBlock() async {
-    int pick = Random().nextInt(7) + 1;
+    int pick = ref.watch(blockQueueProvider.notifier).state.first;
+    Map<int, GridValue> holder = {};
+    bool adjustment = true;
     currentBlock = pick;
     for (var i in BlockPicker(colorIndex: currentBlock).pickBlock().entries) {
-      state[i.key] = GridValue(
+      holder[i.key] = GridValue(
           isPlayer: true, isBlock: true, container: Container(color: i.value));
     }
+    do {
+      int any = 0;
+      for (var i in holder.entries) {
+        if (state[i.key].isBlock && !state[i.key].isPlayer) {
+          any++;
+        }
+      }
+      if (any == 0) {
+        adjustment = false;
+      } else {
+        List<int> holderAdjustment = [];
+        GridValue value = GridValue(
+          isPlayer: true, isBlock: true, container: Container());
+        for(var i in holder.entries){
+          holderAdjustment.add(i.key-10);
+          value = i.value;
+        }
+        holder.clear();
+        for (int i in holderAdjustment) {
+          holder[i] = value;
+        }
+      }
+    } while (adjustment);
+    for(var i in holder.entries){
+      state[i.key] = i.value;
+    }
+
     blocksGenerated++;
   }
 
-  //TODO
-  void checkRowFull() {
+  void checkRowFull({int multiplier = 0}) {
     for (int i = 209; i > 20; i -= 10) {
       int holder = 0;
       for (int row = i; row > i - 10; row--) {
@@ -242,9 +272,24 @@ class Grid extends _$Grid {
         }
         if (holder == 10) {
           clearRow(i);
-          checkRowFull();
+          checkRowFull(multiplier: multiplier + 1);
+          return;
         }
       }
+    }
+    ref
+        .read(scoreProvider.notifier)
+        .incrementScore(multiplier + (multiplier / 30));
+    checkIfGameOver();
+  }
+
+  void checkIfGameOver() {
+    if (state
+        .sublist(0, 30)
+        .any((element) => element.isBlock && !element.isPlayer)) {
+      inGame = false;
+      ref.read(gameEndsProvider.notifier).toggle(true);
+      ref.read(timerProvider.notifier).startCountdown(8);
     }
   }
 
@@ -260,22 +305,36 @@ class Grid extends _$Grid {
       state[i] = blankBox;
     }
     goesDown.forEach((key, value) {
-      state[key+ 10] = value;
+      state[key + 10] = value;
     });
   }
 
 //---------------------Player movements------------------------
 
-  
-
   void buttonFunction(String text) async {
     state = await GameButtonLogic(
-            currentList: state,
-            currentPlayer: findPlayer(state),
-            pressedButton: text)
-        .function();
+      currentList: state,
+      currentPlayer: findPlayer(state),
+      pressedButton: text,
+      reserveBlock: (text == 'Switch')
+          ? ref.watch(reserveBlockProvider.notifier).state
+          : null,
+      blockQueue: (text == 'Switch')
+          ? ref.watch(blockQueueProvider.notifier).state
+          : null,
+    ).function();
+    if (text == 'Switch') {
+      ref
+          .read(blockQueueProvider.notifier)
+          .swapValue(ref.watch(reserveBlockProvider.notifier).state);
+      ref.read(reserveBlockProvider.notifier).reserveBlock();
+    }
+
     if (text == 'Drop') {
-      placeBlock(state, findPlayer(state));
+      await placeBlock(state, findPlayer(state)).then((value) {
+        ref.read(blockQueueProvider.notifier).removeFirstAddAnother();
+        return state = value;
+      });
       checkRowFull();
       generateBlock();
     }

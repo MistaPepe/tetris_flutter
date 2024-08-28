@@ -6,7 +6,7 @@ abstract class ColorBlockPick {
   final int colorIndex;
   ColorBlockPick({required this.colorIndex});
 
-  final List<Color> colorBlock = [
+  final List<Color> _colorBlock = [
     Colors.white10,
     Colors.lightBlue,
     const Color.fromARGB(255, 25, 11, 212),
@@ -15,9 +15,10 @@ abstract class ColorBlockPick {
     Colors.green,
     Colors.purple,
     Colors.red,
+    Colors.pink
   ];
 
- static const List<Color> highLightedBlock = [
+ static const List<Color> _highLightedBlock = [
     Color.fromARGB(136, 118, 212, 255),
     Color.fromARGB(143, 104, 97, 207),
     Color.fromARGB(123, 255, 187, 86),
@@ -25,14 +26,15 @@ abstract class ColorBlockPick {
     Color.fromARGB(127, 126, 170, 128),
     Color.fromARGB(176, 154, 99, 163),
     Color.fromARGB(122, 229, 137, 130),
+    Colors.pink
   ];
 
   Color get getColorBlock {
-    return colorBlock[colorIndex];
+    return _colorBlock[colorIndex];
   }
 
   Color get getHighLightedColorBlock {
-    return highLightedBlock[colorIndex-1];
+    return _highLightedBlock[colorIndex-1];
   }
 }
 
@@ -44,55 +46,55 @@ class BlockPicker extends ColorBlockPick {
     switch (colorIndex) {
       case 1: // Straight Block
         return {
-          33: colorBlock[colorIndex],
-          34: colorBlock[colorIndex],
-          35: colorBlock[colorIndex],
-          36: colorBlock[colorIndex],
+          33: getColorBlock,
+          34: getColorBlock,
+          35: getColorBlock,
+          36: getColorBlock,
         };
       case 2: // J Block
         return {
-          33: colorBlock[colorIndex],
-          34: colorBlock[colorIndex],
-          35: colorBlock[colorIndex],
-          45: colorBlock[colorIndex],
+          33: getColorBlock,
+          34: getColorBlock,
+          35: getColorBlock,
+          45: getColorBlock,
         };
       case 3: // L Block
         return {
-          33: colorBlock[colorIndex],
-          34: colorBlock[colorIndex],
-          35: colorBlock[colorIndex],
-          43: colorBlock[colorIndex],
+          33: getColorBlock,
+          34: getColorBlock,
+          35: getColorBlock,
+          43: getColorBlock,
         };
       case 4: // Square Block
         return {
-          34: colorBlock[colorIndex],
-          35: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
-          45: colorBlock[colorIndex],
+          34: getColorBlock,
+          35: getColorBlock,
+          44: getColorBlock,
+          45: getColorBlock,
         };
       case 5:
         return {
           // S Block
-          34: colorBlock[colorIndex],
-          35: colorBlock[colorIndex],
-          43: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
+          34: getColorBlock,
+          35: getColorBlock,
+          43: getColorBlock,
+          44: getColorBlock,
         };
       case 6:
         return {
           // T Block
-          34: colorBlock[colorIndex],
-          43: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
-          45: colorBlock[colorIndex],
+          34: getColorBlock,
+          43: getColorBlock,
+          44: getColorBlock,
+          45: getColorBlock,
         };
       default:
         return {
           // Z block
-          33: colorBlock[colorIndex],
-          34: colorBlock[colorIndex],
-          44: colorBlock[colorIndex],
-          45: colorBlock[colorIndex],
+          33: getColorBlock,
+          34: getColorBlock,
+          44: getColorBlock,
+          45: getColorBlock,
         };
     }
   }
