@@ -1,7 +1,9 @@
-// ignore_for_file: non_constant_identifier_names
 
 import 'package:flutter/material.dart';
-
+///ui for getting the blocks, color of block, and the foundation of blocks by creating grids of block
+///the grid consist of 220 empty blocks
+///it is 10 widght and 18 height of blocks
+///the rest are not shown, only the index 30 to 209 in the list are shown in grid
 abstract class ColorBlockPick {
   final int colorIndex;
   ColorBlockPick({required this.colorIndex});

@@ -4,7 +4,9 @@ import 'package:tetris_flutter/provider/blank_boxes_provider.dart';
 import 'package:tetris_flutter/provider/grid_block_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
 
-
+/// here is the function of each buttons or keyboard pressed
+/// the logic of rotating and swapping of blocks, pretty much filled up the code in here
+/// as it need to check any valid adjustments when replacing
 typedef Li = List<int>;
 
 class GameButtonLogic {

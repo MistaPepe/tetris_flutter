@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+/// the providers for queue of blocks or what are the next blocks
+/// and provider for the reserve or what the player stored block
 
 /// Next Block Provider
 class BlockQueue extends Notifier<List<int>> {

@@ -6,8 +6,10 @@ import 'package:tetris_flutter/provider/button_function.dart';
 import 'package:tetris_flutter/provider/blank_boxes_provider.dart';
 import 'package:tetris_flutter/user_interface/blocks.dart';
 
-
 part 'grid_block_provider.g.dart';
+
+///provider for the actual logic of the game.
+///
 
 typedef LiGrid = List<GridValue>;
 
@@ -42,7 +44,7 @@ class Grid extends _$Grid {
 
   static int blocksGenerated = 0;
 
-  static int downTimerSpeed = 2000;
+  static int downTimerSpeed = 3000;
 
   static late int currentBlock;
 
@@ -70,7 +72,7 @@ class Grid extends _$Grid {
   bool checkIfInGame() {
     if (!inGame) {
       blocksGenerated = 0;
-      downTimerSpeed = 2000;
+      downTimerSpeed = 3000;
       state = initialBlockLayout();
       updateGrid();
       ref.read(blockQueueProvider.notifier).emptyQueue();
@@ -83,6 +85,17 @@ class Grid extends _$Grid {
   Future downTimer(int currentBlock) async {
     int countdown = 3;
     while (currentBlock == blocksGenerated) {
+      if (blocksGenerated <= 40) {
+        downTimerSpeed = 3000;
+      } else if (blocksGenerated <= 70) {
+        downTimerSpeed = 2000;
+      } else if (blocksGenerated <= 120) {
+        downTimerSpeed = 1000;
+      } else if (blocksGenerated >= 180) {
+        downTimerSpeed = 500;
+      } else if (blocksGenerated >= 250) {
+        downTimerSpeed = 300;
+      }
       await Future.delayed(Duration(milliseconds: downTimerSpeed), () async {
         if (!checkIfInGame() || currentBlock != blocksGenerated) {
           return state;
@@ -243,10 +256,10 @@ class Grid extends _$Grid {
         adjustment = false;
       } else {
         List<int> holderAdjustment = [];
-        GridValue value = GridValue(
-          isPlayer: true, isBlock: true, container: Container());
-        for(var i in holder.entries){
-          holderAdjustment.add(i.key-10);
+        GridValue value =
+            GridValue(isPlayer: true, isBlock: true, container: Container());
+        for (var i in holder.entries) {
+          holderAdjustment.add(i.key - 10);
           value = i.value;
         }
         holder.clear();
@@ -255,12 +268,14 @@ class Grid extends _$Grid {
         }
       }
     } while (adjustment);
-    for(var i in holder.entries){
+    for (var i in holder.entries) {
       state[i.key] = i.value;
     }
 
     blocksGenerated++;
   }
+
+  int chainClear = 0;
 
   void checkRowFull({int multiplier = 0}) {
     for (int i = 209; i > 20; i -= 10) {
@@ -276,9 +291,16 @@ class Grid extends _$Grid {
         }
       }
     }
+    if (multiplier >= 7) {
+      chainClear = 7;
+    } else if (multiplier != 0) {
+      chainClear++;
+    } else {
+      chainClear = 0;
+    }
     ref
         .read(scoreProvider.notifier)
-        .incrementScore(multiplier + (multiplier / 30));
+        .incrementScore(multiplier + (multiplier / 30), 1 + chainClear / 50);
     checkIfGameOver();
   }
 
