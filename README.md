@@ -4,9 +4,9 @@ Recreating Tetris games using dart and flutter
 
 ## Getting Started
 
-It is still in in single player. In future, i planned to implement an online vs. mode using firebase, deployed in web browser
+uses riverpod as the statemanagement for the app
 
-![image](https://github.com/user-attachments/assets/20179f77-2e2b-4c16-800e-26033dcc2894)
+![image](https://github.com/user-attachments/assets/1ce8a5c6-8876-44a7-8317-bb336cb2aaf0)
 
 
 A few resources to get you started if this is your first Flutter project:
